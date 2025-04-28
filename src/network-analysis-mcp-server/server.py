@@ -17,7 +17,7 @@ import logging
 from arcgis.gis import GIS
 from arcgis.geocoding import geocode, batch_geocode
 from arcgis.geocoding import reverse_geocode
-from arcgis.geocoding import get_places_api
+# from arcgis.geocoding import get_places_api
 import arcgis.network as network
 from arcgis.features import Feature, FeatureSet
 from arcgis.geometry import Point
@@ -72,7 +72,6 @@ gis = GIS(api_key=api_key, referer=referer_domain)
 def mcp_geocode(address: str) -> dict[str, str]:
     """Convert an address into geographic coordinates"""
     try:
-        global gis = GIS(api_key=api_key, referer=referer_domain)
         single_line_address = address
         results = geocode(single_line_address)
         # print(results)
