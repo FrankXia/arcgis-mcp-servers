@@ -1,0 +1,19 @@
+[project]
+name = "geocoding-network-service-mcp-server"
+version = "0.1.0"
+description = "A MCP Server for geocoding service"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "fastapi>=0.115.12",
+    "mcp>=1.6.0",
+    "psutil>=7.0.0",
+    "ipykernel>=6.29.5",
+    "arcgis>=2.4.1",
+    "starlette>=0.46.2",
+]
+
+[tool.uv]
+dev-dependencies = [
+    "ipykernel>=6.29.5",
+]
