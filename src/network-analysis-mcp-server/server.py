@@ -334,7 +334,7 @@ def drop_fields_from_features(current_features: List[Feature], fields_to_drop: L
 
 def create_starlette_app(fast_mcp: FastMCP, *, debug: bool = False) -> Starlette:
     """Create a Starlette application that can server the provided mcp server with SSE."""
-    sse = SseServerTransport("/messages/")
+    sse = SseServerTransport("/messages")
     current_mcp_server: Server = fast_mcp._mcp_server  # noqa: WPS437
 
     async def handle_sse(request: Request) -> None:
@@ -364,8 +364,6 @@ def create_starlette_app(fast_mcp: FastMCP, *, debug: bool = False) -> Starlette
 @click.option("--port", default=8090, help="Port to listen on for SSE")
 @click.option("--debug", default=False, help="debug")
 def main(host: str, port: int, debug: bool=False) -> int:
-    # os.environ['REFERER_DOMAIN'] = f'{args.host}:{args.port}'
-    # print(os.environ['REFERER_DOMAIN'])
     global _DEBUG
     _DEBUG = debug
     # Bind SSE request handling to MCP server
