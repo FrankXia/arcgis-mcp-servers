@@ -30,7 +30,6 @@ from mcp.server.session import ServerSession
 # pylint: disable-next=protected-access
 old__received_request = ServerSession._received_request
 
-
 async def _received_request(self, *args, **kwargs):
     try:
         return await old__received_request(self, *args, **kwargs)
@@ -44,7 +43,7 @@ ServerSession._received_request = _received_request
 
 # Create an MCP server
 mcp = FastMCP("Network Analysis MCP Server")
-DEBUG = False
+_DEBUG = False
 
 # ArcGIS Online or ArcGIS Location Platform API Key
 try:
@@ -67,6 +66,7 @@ gis = GIS(api_key=api_key, referer=referer_domain)
 ## You must be signed into the GIS to use the Places API
 # find_places = get_places_api(gis)
 
+
 # Add all the tools
 @mcp.tool(name='geocode')
 def mcp_geocode(address: str) -> dict[str, str]:
@@ -74,7 +74,7 @@ def mcp_geocode(address: str) -> dict[str, str]:
     try:
         single_line_address = address
         results = geocode(single_line_address)
-        # print(results)
+        print(results)
         result = results[0]
         address = result["address"]
         location = result["location"]
@@ -104,8 +104,7 @@ def mcp_find_routes(stops: List[str], include_route_geometry: bool=False) -> dic
         if stop_features is None:
             return {"content": "Couldn't convert the given stops into valid addresses!", "isError": True}
         logging.info("Convert stops to addresses successfully!")
-        if DEBUG:
-            logging.info(stop_features)
+        logging.info(stop_features)
 
         logging.info("Calling 'find route' function ...")
         # use current time. TODO: Time_Zone?
@@ -140,8 +139,7 @@ def mcp_find_routes(stops: List[str], include_route_geometry: bool=False) -> dic
                 route_summary = json.dumps(updated_output_routes.to_dict())
 
         content = {"route_summary": json.loads(route_summary), "route_directions": json.loads(route_directions), "output_stops": json.loads(results.output_stops.to_geojson)}
-        if DEBUG:
-            logging.info(content)
+        logging.info(content)
 
         return {"content": json.dumps(content), "isError": False}
 
@@ -197,7 +195,10 @@ def mcp_generate_service_areas(facilities: List[str], time_breaks: List[float] |
         return {"content": "Couldn't generate service areas for the given facilities!", "isError": True}
 
 @mcp.tool(name='find_closest_facilities')
-def mcp_find_closest_facilities(incidents: List[str], facilities: List[str], include_geometry: bool=False) -> dict[str, str]:
+def mcp_find_closest_facilities(incidents: List[str],
+                                facilities: List[str],
+                                include_geometry: bool=False,
+                                cutoff_time_in_min: float = 10) -> dict[str, str]:
     """Find the closest facilities for each incident in the list."""
     try:
         # get incident features
@@ -213,7 +214,7 @@ def mcp_find_closest_facilities(incidents: List[str], facilities: List[str], inc
         # use current time. TODO: Time_Zone?
         current_time = int(dt.datetime.now().timestamp() * 1000)
         # default cutoff time in minutes
-        cutoff = 10
+        cutoff = cutoff_time_in_min
         # default facilities to find
         max_facilities_to_find = 4
         if len(facilities) < 4:
@@ -251,7 +252,10 @@ def mcp_find_closest_facilities(incidents: List[str], facilities: List[str], inc
         return {"content": "Couldn't generate service areas for the given facilities!", "isError": True}
 
 @mcp.tool(name='create_cost_matrix')
-def mcp_create_origin_destination_cost_matrix(origins: List[str], destinations: List[str], include_geometry: bool=False) -> dict[str, str]:
+def mcp_create_origin_destination_cost_matrix(origins: List[str],
+                                              destinations: List[str],
+                                              include_geometry: bool=False,
+                                              cutoff_time_in_min: float=10) -> dict[str, str]:
     """Generate a cost matrix for the given origin and destination locations."""
     try:
         # get incident features
@@ -266,7 +270,7 @@ def mcp_create_origin_destination_cost_matrix(origins: List[str], destinations: 
 
         current_time = dt.datetime.now()
         # default cutoff time in minutes
-        cutoff = 10
+        cutoff = cutoff_time_in_min
         # default destinations to find
         max_destinations_to_find = 4
         if len(destinations) < 4:
@@ -333,20 +337,7 @@ def create_starlette_app(fast_mcp: FastMCP, *, debug: bool = False) -> Starlette
     sse = SseServerTransport("/messages/")
     current_mcp_server: Server = fast_mcp._mcp_server  # noqa: WPS437
 
-    async def get_token(request):
-        authorization_header = request.headers.get("Authorization")
-        if authorization_header:
-            # Assuming the token is in the format "Bearer <token>"
-            token_type, token = authorization_header.split(maxsplit=1)
-            if token_type.lower() == "bearer":
-                return {"token": token}
-            else:
-                return {"error": "Invalid token type"}
-        else:
-            return {"error": "Authorization header missing"}
-
     async def handle_sse(request: Request) -> None:
-
         async with sse.connect_sse(
                 request.scope,
                 request.receive,
@@ -375,10 +366,10 @@ def create_starlette_app(fast_mcp: FastMCP, *, debug: bool = False) -> Starlette
 def main(host: str, port: int, debug: bool=False) -> int:
     # os.environ['REFERER_DOMAIN'] = f'{args.host}:{args.port}'
     # print(os.environ['REFERER_DOMAIN'])
-    global DEBUG
-    DEBUG=debug
+    global _DEBUG
+    _DEBUG = debug
     # Bind SSE request handling to MCP server
-    starlette_app = create_starlette_app(mcp, debug=DEBUG)
+    starlette_app = create_starlette_app(mcp, debug=_DEBUG)
 
     uvicorn.run(starlette_app, host=host, port=port)
     return 0
