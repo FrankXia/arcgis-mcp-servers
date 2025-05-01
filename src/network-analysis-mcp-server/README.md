@@ -15,7 +15,8 @@ To make it work, we need to use a proxy gateway to connect Claude App to a remot
 
 Here is the MCP Proxy Server configuration for Claude Desktop App: 
 
-`{
+```json
+{
   "mcpServers": {
     "Esri Network Analysis": {
       "command": "npx",
@@ -27,5 +28,6 @@ Here is the MCP Proxy Server configuration for Claude Desktop App:
       ]
     }
   }
-}`
+}
+```
 
