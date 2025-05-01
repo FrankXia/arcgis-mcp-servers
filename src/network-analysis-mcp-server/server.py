@@ -74,7 +74,7 @@ def mcp_geocode(address: str) -> dict[str, str]:
     try:
         single_line_address = address
         results = geocode(single_line_address)
-        print(results)
+        # print(results)
         result = results[0]
         address = result["address"]
         location = result["location"]
@@ -198,7 +198,7 @@ def mcp_generate_service_areas(facilities: List[str], time_breaks: List[float] |
 def mcp_find_closest_facilities(incidents: List[str],
                                 facilities: List[str],
                                 include_geometry: bool=False,
-                                cutoff_time_in_min: float = 10) -> dict[str, str]:
+                                cutoff_time_in_min: float = 60) -> dict[str, str]:
     """Find the closest facilities for each incident in the list."""
     try:
         # get incident features
@@ -255,7 +255,7 @@ def mcp_find_closest_facilities(incidents: List[str],
 def mcp_create_origin_destination_cost_matrix(origins: List[str],
                                               destinations: List[str],
                                               include_geometry: bool=False,
-                                              cutoff_time_in_min: float=10) -> dict[str, str]:
+                                              cutoff_time_in_min: float=60) -> dict[str, str]:
     """Generate a cost matrix for the given origin and destination locations."""
     try:
         # get incident features
@@ -303,6 +303,18 @@ def mcp_create_origin_destination_cost_matrix(origins: List[str],
         return {"content": "Couldn't generate service areas for the given facilities!", "isError": True}
 
 
+@mcp.resource("echo://{message}")
+def echo_resource(message: str) -> str:
+    """Echo a message as a resource"""
+    return f"Resource echo: {message}"
+
+
+@mcp.prompt()
+def echo_prompt(message: str) -> str:
+    """Create an echo prompt"""
+    return f"Please process this message: {message}"
+
+
 # create features from the batch geocoded results
 def convert_poi_list_into_features(poi_list: List[str]) -> FeatureSet | None:
     # use batch geocode to get the given stops' address and location/geometry
@@ -332,9 +344,9 @@ def drop_fields_from_features(current_features: List[Feature], fields_to_drop: L
             updated_features.append(Feature(attributes=attrs))
     return FeatureSet(features=updated_features)
 
-def create_starlette_app(fast_mcp: FastMCP, *, debug: bool = False) -> Starlette:
+def create_starlette_app(fast_mcp: FastMCP, base_path: str, debug: bool = False) -> Starlette:
     """Create a Starlette application that can server the provided mcp server with SSE."""
-    sse = SseServerTransport("/messages")
+    sse = SseServerTransport(f"{base_path}/messages/")
     current_mcp_server: Server = fast_mcp._mcp_server  # noqa: WPS437
 
     async def handle_sse(request: Request) -> None:
@@ -351,8 +363,8 @@ def create_starlette_app(fast_mcp: FastMCP, *, debug: bool = False) -> Starlette
 
     # Create Starlette routes for SSE and message handling
     routes = [
-        Route("/sse", endpoint=handle_sse),
-        Mount("/messages", app=sse.handle_post_message),
+        Route(f"{base_path}/sse", endpoint=handle_sse),
+        Mount(f"{base_path}/messages/", app=sse.handle_post_message),
     ]
     return Starlette(
         debug=debug,
