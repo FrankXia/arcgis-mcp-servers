@@ -122,4 +122,10 @@ Please create MCP server TOOL code only for the FIVE ArcGIS spatial analysis too
 ```
 
 The Gemini Pro will successfully generate one MCP tool for each spatial analysis GP tool, a simple cut and paste the generated code into existing `arcgis_mcp_server_spatial_analysis.py` will make it a MCP Server contains ALL 33 GP tools from https://developers.arcgis.com/rest/analysis/api-reference/getting-started.htm. 
-(The only manual editing we did was to comment out some additional citing such as `[cite: 251]` after a correct line of code in some generated tool code (less than a dozen or so).  
+(The only manual editing we did was to comment out some additional citing such as `[cite: 251]` after a correct line of code in some generated tool code (less than a dozen or so).
+
+Here are the screenshots of Spatial Analysis tools loaded in Claude Desktop App: 
+
+![ArcGIS Spatial Analysis 33 tools](Claude-ArcGIS-MCP-Server1.png)
+
+![ArcGIS Spatial Analysis 33 tools - partial list](Claude-ArcGIS-MCP-Server2.png)

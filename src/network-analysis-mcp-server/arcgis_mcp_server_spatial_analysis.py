@@ -187,6 +187,7 @@ async def find_hot_spots(
     outputName: str = None,
     context: Dict = None,
 ) -> Dict:
+    # Manually added wrap for the generated mcp tool function (find_hot_spots)
     loop = asyncio.get_event_loop()
     results = await loop.create_task(
         find_hot_spots_internal(
@@ -3667,9 +3668,9 @@ async def summarize_nearby(
     Distance can be straight-line or by a travel mode. [cite: 132]
     """
     if sumShape is True and not shapeUnits:
-        return {"error": "shapeUnits is required when sumShape is true."} [cite: 163]
+        return {"error": "shapeUnits is required when sumShape is true."} # [cite: 163]
     if sumShape is False and not summaryFields:
-        return {"error": "summaryFields is required when sumShape is false."} [cite: 163]
+        return {"error": "summaryFields is required when sumShape is false."} # [cite: 163]
     if not units and isinstance(nearType, str) and nearType.lower() == "straightline":
         return {"error": "units are required when nearType is 'StraightLine'."}
     if not units and isinstance(nearType, dict) and "impedanceAttributeName" in nearType and "timeAttributeName" not in nearType.get("impedanceAttributeName", "").lower(): # crude check for distance-based travel mode
@@ -3918,9 +3919,9 @@ async def summarize_within(
     Summarizes features (points, lines, or polygons) that fall within the boundaries of polygons in another layer or within generated bins. [cite: 45]
     """
     if not sumWithinLayer and not binType:
-        return {"error": "Either sumWithinLayer or binType (with binSize and binSizeUnit) must be provided."} [cite: 74]
+        return {"error": "Either sumWithinLayer or binType (with binSize and binSizeUnit) must be provided."} # [cite: 74]
     if binType and (binSize is None or binSizeUnit is None):
-        return {"error": "binSize and binSizeUnit are required when binType is specified."} [cite: 74]
+        return {"error": "binSize and binSizeUnit are required when binType is specified."} # [cite: 74]
     if sumWithinLayer and binType:
         return {"error": "Provide either sumWithinLayer or binType parameters, not both."}
 
@@ -3928,9 +3929,9 @@ async def summarize_within(
         # This is only strictly required if summaryLayer is line/polygon. For points, sumShape=true gives count.
         # The PDF example for shapeUnits only lists polygon and line units[cite: 62].
         # Assuming it's required generally for clarity if sumShape is true.
-        return {"error": "shapeUnits is required when sumShape is true."} [cite: 60, 62]
+        return {"error": "shapeUnits is required when sumShape is true."} # [cite: 60, 62]
     if sumShape is False and not summaryFields:
-        return {"error": "summaryFields is required when sumShape is false."} [cite: 62]
+        return {"error": "summaryFields is required when sumShape is false."} # [cite: 62]
 
 
     results = await summarize_within_internal(
@@ -4152,6 +4153,6 @@ async def trace_downstream_internal(
 
 if __name__ == "__main__":
     print("To run the server, use the command:")
-    print("uvicorn your_filename:app --reload --port 8000")
+    print("uvicorn arcgis_mcp_server_spatial_analysis:app --reload --port 8000")
     print("Ensure ARCGIS_USER and ARCGIS_PASSWORD environment variables are set.")
 
